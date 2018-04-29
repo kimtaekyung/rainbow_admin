@@ -1,5 +1,5 @@
 $(document).ready(function(){
-	
+	//커밋 테스트
 	//클릭이벤트 잡아서 레이어 감추기
 	$(document).on("click",function(e){
 		//.hideLayerGroup라는 class를 가진이외의 영역에서 클릭이벤트가 일어났을때
