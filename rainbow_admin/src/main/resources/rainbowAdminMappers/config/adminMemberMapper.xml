@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rainbow.admin.config.dao.AdminMemberDao">
+	
+	<!-- 관리자회원 목록 조회 -->
+	<select id="getAdminMemberList" parameterType="hashmap" resultType="hashmap" statementType="PREPARED">
+		SELECT
+			ADMIN_SEQ
+			,MB_SEQ
+			,ADMIN_ID
+			,ADMIN_PASSWORD
+			,ADMIN_NAME
+			,ADMIN_HP
+			,ADMIN_EMAIL
+			,ADMIN_STATE
+			,(CASE WHEN ADMIN_STATE = '1' THEN '정상'
+					WHEN ADMIN_STATE = '2' THEN '정지'
+					WHEN ADMIN_STATE = '3' THEN '삭제' END) AS ADMIN_STATE_NAME
+			,ADMIN_IS_LOGIN
+			,ADMIN_LOGIN_IP
+			,ADMIN_REG_DTTM
+			,ADMIN_REG_USER
+			,ADMIN_MOD_DTTM
+			,ADMIN_MOD_USER
+		FROM RB_ADMIN_MEMBER
+		WHERE 1 = 1
+		ORDER BY ADMIN_REG_DTTM DESC
+		LIMIT #{page}, #{pageSize}
+	</select>
+	
+	<!-- 관리자회원 목록 카운트 조회 -->
+	<select id="getAdminMemberListCount" parameterType="hashmap" resultType="int" statementType="PREPARED">
+		SELECT
+			COUNT(*) AS CNT
+		FROM RB_ADMIN_MEMBER
+		WHERE 1 = 1
+	</select>
+	
+	<!-- 관리자 정보 한건 조회 -->
+	<select id="getAdminMemberOne" parameterType="hashmap" resultType="hashmap" statementType="PREPARED">
+		SELECT
+			ADMIN_SEQ
+			,MB_SEQ
+			,ADMIN_ID
+			,ADMIN_PASSWORD
+			,ADMIN_NAME
+			,ADMIN_HP
+			,ADMIN_EMAIL
+			,ADMIN_STATE
+			,(CASE WHEN ADMIN_STATE = '1' THEN '정상'
+					WHEN ADMIN_STATE = '2' THEN '정지'
+					WHEN ADMIN_STATE = '3' THEN '삭제' END) AS ADMIN_STATE_NAME
+			,ADMIN_IS_LOGIN
+			,ADMIN_LOGIN_IP
+			,ADMIN_REG_DTTM
+			,ADMIN_REG_USER
+			,ADMIN_MOD_DTTM
+			,ADMIN_MOD_USER
+		FROM RB_ADMIN_MEMBER
+		WHERE ADMIN_SEQ = #{admin_seq}
+	</select>
+	
+	<!-- 관리자 메뉴 권한 조회 -->
+	<select id="getAdminMemberMenuAuthList" parameterType="hashmap" resultType="hashmap" statementType="PREPARED">
+		SELECT
+			A.MENU_SEQ
+			,A.MENU_NAME
+			,A.MENU_LINK
+			,A.MENU_DEPTH
+			,A.MENU_PARENT
+			,A.MENU_ORDER
+			,A.MENU_USE_YN
+		    ,IFNULL(B.MENU_SEQ, 0) AS IS_MENU_AUTH
+		FROM RB_ADMIN_MENU A
+			LEFT OUTER JOIN (
+		    	SELECT
+		        	MENU_SEQ
+		        FROM RB_ADMIN_MENU_AUTH
+		        WHERE ADMIN_SEQ = #{admin_seq}
+		        ) B ON B.MENU_SEQ = A.MENU_SEQ
+		WHERE A.MENU_USE_YN = 1
+		ORDER BY MENU_DEPTH ASC, MENU_ORDER ASC
+	</select>
+	
+	<!-- 일반유저에 관리자 회원정보 등록 -->
+	
+	<!-- 관리자 회원정보 등록 -->
+	<insert id="insertAdminMember" parameterType="hashmap" statementType="PREPARED">
+		INSERT INTO RB_ADMIN_MEMBER(
+			MB_SEQ
+			,ADMIN_ID
+			,ADMIN_PASSWORD
+			,ADMIN_NAME
+			,ADMIN_HP
+			,ADMIN_EMAIL
+			,ADMIN_STATE
+			,ADMIN_IS_LOGIN
+			,ADMIN_REG_DTTM
+			,ADMIN_REG_USER
+		) VALUES(
+			#{mb_seq}
+			,#{admin_id}
+			,#{admin_password}
+			,#{admin_name}
+			,#{admin_hp}
+			,#{admin_email}
+			,#{admin_state}
+			,0
+			,NOW()
+			,#{admin_reg_user}
+		)
+	</insert>
+	
+	<!-- 관리자 회원정보 수정 -->
+	<update id="updateAdminMember" parameterType="hashmap" statementType="PREPARED">
+		UPDATE RB_ADMIN_MEMBER
+		SET ADMIN_NAME = #{admin_name}
+		<if test='admin_password != null and admin_password != ""'>
+			,ADMIN_PASSWORD = #{admin_password}
+		</if>
+			,ADMIN_HP = #{admin_hp}
+			,ADMIN_EMAIL = #{admin_email}
+			,ADMIN_STATE = #{admin_state}
+			,ADMIN_MOD_DTTM = NOW()
+			,ADMIN_MOD_USER = #{admin_mod_user}
+		WHERE ADMIN_SEQ = #{admin_seq}
+	</update>
+	
+	<!-- 관리자 메뉴권한 등록 -->
+	<insert id="insertAdminMenuAuth" parameterType="hashmap" statementType="PREPARED">
+		INSERT INTO RB_ADMIN_MENU_AUTH(
+			ADMIN_SEQ
+			,MENU_SEQ
+			,AUTH_REG_DTTM
+			,AUTH_REG_USER
+		) VALUES
+		<foreach collection="authList" item="item" separator=",">
+		(
+			#{admin_seq}
+			,#{item}
+			,NOW()
+			,#{auth_reg_user}
+		)
+		</foreach>
+		
+	</insert>
+	
+	<!-- 관리자 메뉴권한 삭제 -->
+	<delete id="deleteAdminMenuAuth" parameterType="hashmap" statementType="PREPARED">
+		DELETE
+		FROM RB_ADMIN_MENU_AUTH
+		WHERE ADMIN_SEQ = #{admin_seq}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rainbow.admin.config.dao.AdminMenuDao">
+	
+	<!-- 메뉴목록을 조회한다 -->
+	<select id="getAdminMenuList" parameterType="hashmap" resultType="hashmap" statementType="PREPARED">
+		SELECT
+			MENU_SEQ
+			,MENU_NAME
+			,MENU_LINK
+			,MENU_DEPTH
+			,MENU_PARENT
+			,MENU_ORDER
+			,MENU_USE_YN
+			,MENU_REG_DTTM
+			,MENU_REG_USER
+			,MENU_MOD_DTTM
+			,MENU_MOD_USER
+		FROM RB_ADMIN_MENU
+		WHERE 1 = 1
+		<if test='menu_parent != null and menu_parent != ""'>
+		AND MENU_PARENT = #{menu_parent}
+		</if>
+		<if test='menu_name != null and menu_name != ""'>
+		AND MENU_NAME LIKE CONCAT('%', #{menu_name}, '%')
+		</if>
+		ORDER BY MENU_DEPTH ASC, MENU_ORDER ASC
+	</select>
+	
+	<!-- 메뉴 등록 -->
+	<insert id="insertAdminMenu" parameterType="hashmap" statementType="PREPARED">
+		INSERT INTO RB_ADMIN_MENU(
+			MENU_NAME
+			,MENU_LINK
+			,MENU_DEPTH
+			,MENU_PARENT
+			,MENU_ORDER
+			,MENU_USE_YN
+			,MENU_REG_DTTM
+			,MENU_REG_USER
+		) VALUES(
+			#{menu_name}
+			,#{menu_link}
+			,#{menu_depth}
+			,#{menu_parent}
+			,#{menu_order}
+			,#{menu_use_yn}
+			,NOW()
+			,#{menu_reg_user}
+		)
+	</insert>
+	
+	<!-- 메뉴 수정 -->
+	<update id="updateAdminMenu" parameterType="hashmap" statementType="PREPARED">
+		UPDATE RB_ADMIN_MENU
+		SET MENU_NAME = #{menu_name}
+			,MENU_LINK = #{menu_link}
+			,MENU_DEPTH = #{menu_depth}
+			,MENU_PARENT = #{menu_parent}
+			,MENU_ORDER = #{menu_order}
+			,MENU_USE_YN = #{menu_use_yn}
+			,MENU_MOD_DTTM = NOW()
+			,MENU_MOD_USER = #{menu_reg_user}
+		WHERE MENU_SEQ = #{menu_seq}
+	</update>
+</mapper>

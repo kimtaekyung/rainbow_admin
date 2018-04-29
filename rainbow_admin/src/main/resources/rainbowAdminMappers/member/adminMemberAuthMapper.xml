@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rainbow.admin.member.dao.AdminMemberAuthDao">
+	
+	<!-- 관리자 회원정보 ID로 조회 -->
+	<select id="getAdminMemberById" parameterType="hashmap" resultType="hashmap" statementType="PREPARED">
+		SELECT
+			ADMIN_SEQ
+			,MB_SEQ
+			,ADMIN_ID
+			,ADMIN_PASSWORD
+			,ADMIN_NAME
+			,ADMIN_HP
+			,ADMIN_EMAIL
+			,ADMIN_STATE
+			,ADMIN_IS_LOGIN
+			,ADMIN_LOGIN_IP
+			,ADMIN_REG_DTTM
+			,ADMIN_REG_USER
+			,ADMIN_MOD_DTTM
+			,ADMIN_MOD_USER
+		FROM RB_ADMIN_MEMBER
+		WHERE ADMIN_ID = #{admin_id}
+	</select>
+	
+	<!-- 관리자 회원정보 조회 -->
+	<select id="getAdminMember" parameterType="hashmap" resultType="hashmap" statementType="PREPARED">
+		SELECT
+			ADMIN_SEQ
+			,MB_SEQ
+			,ADMIN_ID
+			,ADMIN_PASSWORD
+			,ADMIN_NAME
+			,ADMIN_HP
+			,ADMIN_EMAIL
+			,ADMIN_STATE
+			,ADMIN_IS_LOGIN
+			,ADMIN_LOGIN_IP
+			,ADMIN_REG_DTTM
+			,ADMIN_REG_USER
+			,ADMIN_MOD_DTTM
+			,ADMIN_MOD_USER
+		FROM RB_ADMIN_MEMBER
+		WHERE ADMIN_SEQ = #{admin_seq}
+	</select>
+	
+	<!-- 회원 로그인(아웃) 상태 업데이트 -->
+	<update id="updateAdminMemberIsLogin" parameterType="hashmap" statementType="PREPARED">
+		UPDATE RB_ADMIN_MEMBER
+		SET ADMIN_IS_LOGIN = #{admin_is_login}
+		<if test='admin_login_ip != null and admin_login_ip != ""'>
+			,ADMIN_LOGIN_IP = #{admin_login_ip}
+		</if>
+		WHERE ADMIN_SEQ = #{admin_seq}
+	</update>
+	
+	
+	<!-- 회원 로그인(아웃) 내역 등록 -->
+	<insert id="insertAdminMemberLogin" parameterType="hashmap" statementType="PREPARED">
+		INSERT INTO RB_ADMIN_MEMBER_LOGIN(
+			ADMIN_SEQ
+			,LO_TYPE
+			,LO_IP
+			,LO_DTTM
+		) VALUES(
+			#{admin_seq}
+			,#{lo_type}
+			,#{lo_ip}
+			,NOW()
+		)
+	</insert>
+	
+</mapper>
